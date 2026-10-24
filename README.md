@@ -13,7 +13,7 @@ Plug a 16" 2560×1600 portable monitor into a MacBook and macOS offers two kinds
 - **1280×800 HiDPI** – sharp, but everything is huge.
 - **1680×1050, 1920×1200, …** – a comfortable size, but *not* HiDPI. macOS draws 1680×1050 pixels and the monitor stretches them to 2560×1600, so text looks blurry.
 
-What you actually want is "looks like 1680×1050" rendered at 3360×2100 and scaled down to the panel, which is what MacBooks do on their own screens. macOS on Apple Silicon won't offer HiDPI modes larger than the panel, and the old display-override plist trick no longer works there.
+What you actually want is "looks like 1680×1050" rendered at 3360×2100 and scaled down to the panel, which is what MacBooks do on their own screens. On monitors below 4K, macOS on Apple Silicon offers only one HiDPI mode (half the panel resolution) and nothing larger than the panel, and the old display-override plist trick no longer works there.
 
 You don't need this for 4K monitors: macOS already offers 1920×1080 HiDPI on them.
 
