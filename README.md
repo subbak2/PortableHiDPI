@@ -140,7 +140,7 @@ While mirroring, macOS keeps the real monitor's own desktop area at its native H
 
 PortableHiDPI draws a copy of the cursor there, in a click-through window, only when the cursor is not the arrow. It matches your Pointer size setting (System Settings › Accessibility › Display); after changing it, choose **Match Cursor Size** in the menu.
 
-Because it's drawn by an app rather than the hardware, that copy can trail the mouse by about a frame and switches shape a few milliseconds late. It costs a few % CPU only while the pointer moves in that strip, and nothing elsewhere.
+Because it's drawn by an app rather than the hardware, that copy can trail the mouse by about a frame, and it checks the cursor shape every 0.1 s, so hand ↔ arrow switches can lag by up to 0.1 s. It costs a few % CPU only while the pointer moves in that strip, and nothing elsewhere.
 
 ## Limitations
 

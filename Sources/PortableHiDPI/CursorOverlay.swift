@@ -116,8 +116,8 @@ final class CursorOverlay {
             RunLoop.main.add(t, forMode: .common)
             timer = t
         }
-        // While moving, check the shape every ~30 ms so hand ↔ arrow switches follow quickly.
-        if Date().timeIntervalSince(lastShapeCheck) > 0.03 {
+        // Shape checks (a window-server round trip) are limited to every 0.1 s to keep CPU low.
+        if Date().timeIntervalSince(lastShapeCheck) > 0.1 {
             lastShapeCheck = Date()
             refreshShape()
         }
