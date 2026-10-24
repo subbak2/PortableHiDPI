@@ -87,11 +87,43 @@ Quitting or choosing **Off** removes the virtual display and restores the monito
 - No network access: the app makes no connections and opens no ports. The only link is the "About" menu item, which opens this page in your browser.
 - No admin password, no special entitlements, no system files changed. Settings live in the app's own preferences (`io.github.subbak2.PortableHiDPI`).
 - No data collection or analytics.
+- The release is ad-hoc signed and not notarized (no paid Apple Developer ID). Build it yourself from source if you prefer.
 - Download only from this repository's Releases. Each release lists the zip's SHA-256; check it with `shasum -a 256 PortableHiDPI.zip`.
+
+## Private API: what can go wrong
+
+`CGVirtualDisplay` is undocumented. It has shipped in every macOS since 11 and other display tools rely on it too, but Apple can change or remove it without notice.
+
+| If a macOS update… | What happens | What you do |
+|---|---|---|
+| removes the classes | The app still launches (they are weak-linked), the menu says "Not supported on this macOS version", nothing is applied | Wait for an update, or delete the app |
+| changes their behavior | Enabling fails with an error and the setting is not retried on reconnect | Choose **Off** or quit |
+| makes mirroring misbehave | Black borders, blur or a black external screen | **Re-apply**, unplug the monitor, or quit |
+
+App Store review rejects private APIs, so this app will only ever be distributed here.
+
+## Safety and recovery
+
+The app can't damage hardware or brick the Mac. It only creates a virtual display and changes display modes for the current login session; nothing is written to firmware, system files or the monitor.
+
+Safeguards built in:
+
+- The built-in screen is never touched, so you always have a working display.
+- Display changes are made "for this session" only. Logging out or restarting always returns every display to the setting chosen in System Settings.
+- If the app is quit, crashes or is force-quit, macOS removes the virtual display and the monitor returns to its previous mode.
+- If the previous run died while applying a setting, the next launch does not auto-apply (safe start). Hold **Shift** while launching for the same.
+- If the private API is missing, the app turns itself off instead of crashing.
+
+If the external screen ever goes black or wrong, in order:
+
+1. Menu › **Re-apply**, or **Off**
+2. Quit the app from the menu bar (on the built-in screen)
+3. Unplug the monitor and plug it back in
+4. Log out or restart. To keep the app from starting at login once, hold **Shift** on the login screen when you click Log In
+5. Reset saved settings: `defaults delete io.github.subbak2.PortableHiDPI`
 
 ## Limitations
 
-- `CGVirtualDisplay` is a **private Apple API**. It has worked since macOS 11 and is used by several display tools, but a macOS update could break it.
 - While mirroring, HDR is not available and the monitor runs SDR.
 - 120 Hz through a mirrored virtual display can feel choppy on some setups; use 60 Hz if it does.
 - Rendering at 2x costs some GPU time and memory (a 3360×2100 frame buffer).

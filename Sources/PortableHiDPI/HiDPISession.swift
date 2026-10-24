@@ -3,10 +3,11 @@ import CoreGraphics
 import Foundation
 
 enum HiDPIError: LocalizedError {
-    case createFailed, applyFailed, modeNotFound, configureFailed(CGError)
+    case unsupported, createFailed, applyFailed, modeNotFound, configureFailed(CGError)
 
     var errorDescription: String? {
         switch self {
+        case .unsupported: return L("This macOS version no longer provides the virtual display API.", "이 macOS 버전에는 가상 디스플레이 기능이 없습니다.")
         case .createFailed: return L("Could not create the virtual display.", "가상 디스플레이를 만들지 못했습니다.")
         case .applyFailed: return L("The virtual display rejected the resolution.", "가상 디스플레이가 해상도를 받아들이지 않았습니다.")
         case .modeNotFound: return L("macOS did not offer the HiDPI mode in time.", "macOS가 HiDPI 모드를 제때 띄우지 않았습니다.")
@@ -14,6 +15,11 @@ enum HiDPIError: LocalizedError {
         }
     }
 }
+
+/// False when this macOS no longer ships the private classes we use.
+let virtualDisplaySupported: Bool = ["CGVirtualDisplay", "CGVirtualDisplayDescriptor",
+                                     "CGVirtualDisplayMode", "CGVirtualDisplaySettings"]
+    .allSatisfy { NSClassFromString($0) != nil }
 
 /// One physical display mirrored from a HiDPI virtual display.
 ///
@@ -37,6 +43,7 @@ final class HiDPISession {
     }
 
     func start(completion: @escaping (Error?) -> Void) {
+        guard virtualDisplaySupported else { return completion(HiDPIError.unsupported) }
         originalMode = CGDisplayCopyDisplayMode(display.id)
 
         let w = resolution.width, h = resolution.height

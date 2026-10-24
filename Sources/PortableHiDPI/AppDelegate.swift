@@ -7,6 +7,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var displayCache: [String: PhysicalDisplay] = [:]
     private var reconfigureScheduled = false
     private var isAsleep = false
+    /// Saved settings are not auto-applied this run: Shift was held at launch, or the previous
+    /// run died while applying (crash or force quit), so we don't loop into the same failure.
+    /// Picking a resolution from the menu clears it.
+    private var safeStart = false
     private let defaults = UserDefaults.standard
     private let repoURL = URL(string: "https://github.com/subbak2/PortableHiDPI")!
 
@@ -27,6 +31,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         center.addObserver(self, selector: #selector(willSleep), name: NSWorkspace.willSleepNotification, object: nil)
         center.addObserver(self, selector: #selector(didWake), name: NSWorkspace.didWakeNotification, object: nil)
 
+        if NSEvent.modifierFlags.contains(.shift) || defaults.bool(forKey: "applyInProgress") {
+            safeStart = true
+            defaults.removeObject(forKey: "applyInProgress")
+        }
         reconcile()
     }
 
@@ -75,7 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             sessions[key] = nil
         }
         sessions.values.forEach { $0.enforcePanelMode() }
-        for display in externals where sessions[display.key] == nil {
+        for display in externals where sessions[display.key] == nil && !safeStart && virtualDisplaySupported {
             if let res = savedResolution(for: display.key), display.candidates.contains(res) {
                 enable(display, res, refresh: preferredRefresh(for: display), remember: false)
             }
@@ -101,9 +109,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sessions[display.key]?.stop()
         let session = HiDPISession(display: display, resolution: res, refresh: refresh)
         sessions[display.key] = session
-        if remember { saveResolution(res, for: display.key) }
+        if remember {
+            saveResolution(res, for: display.key)
+            safeStart = false
+        }
+        defaults.set(true, forKey: "applyInProgress")
         session.start { [weak self] error in
-            guard let self, let error else { return }
+            guard let self else { return }
+            self.defaults.removeObject(forKey: "applyInProgress")
+            guard let error else { return }
             if self.sessions[display.key] === session { self.sessions[display.key] = nil }
             // Don't retry a failing setting on every reconnect.
             self.saveResolution(nil, for: display.key)
@@ -130,6 +144,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         let externals = Displays.externals(cache: &displayCache)
+        if !virtualDisplaySupported {
+            menu.addItem(disabledItem(L("Not supported on this macOS version", "이 macOS 버전에서는 지원되지 않음")))
+        } else if safeStart && sessions.isEmpty {
+            menu.addItem(disabledItem(L("Safe start: saved settings not applied", "안전 시작: 저장된 설정을 적용하지 않음")))
+        }
         if externals.isEmpty {
             menu.addItem(disabledItem(L("No external display", "연결된 외장 모니터 없음")))
         }

@@ -14,7 +14,9 @@ cp "$BIN" "$APP/Contents/MacOS/PortableHiDPI"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 
 # Ad-hoc signature (no Apple Developer ID). Gatekeeper will ask once on first launch.
-codesign --force --deep --sign - "$APP"
+# The bundle has a single executable; sign it explicitly (no --deep) and verify.
+codesign --force --sign - "$APP"
+codesign --verify --strict --verbose=1 "$APP"
 
 ditto -c -k --keepParent "$APP" build/PortableHiDPI.zip
 echo "Built $APP and build/PortableHiDPI.zip"
