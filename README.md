@@ -82,6 +82,13 @@ Turn off **Launch at Login**, quit, and move the app to the Trash. To also remov
 
 Quitting or choosing **Off** removes the virtual display and restores the monitor's previous mode. Nothing is installed system-wide and no admin password is needed. Before sleep the virtual display is removed, and it's recreated about 3 seconds after wake (mirroring across sleep is fragile in macOS).
 
+## Privacy and security
+
+- No network access: the app makes no connections and opens no ports. The only link is the "About" menu item, which opens this page in your browser.
+- No admin password, no special entitlements, no system files changed. Settings live in the app's own preferences (`io.github.subbak2.PortableHiDPI`).
+- No data collection or analytics.
+- Download only from this repository's Releases. Each release lists the zip's SHA-256; check it with `shasum -a 256 PortableHiDPI.zip`.
+
 ## Limitations
 
 - `CGVirtualDisplay` is a **private Apple API**. It has worked since macOS 11 and is used by several display tools, but a macOS update could break it.
