@@ -122,11 +122,22 @@ If the external screen ever goes black or wrong, in order:
 4. Log out or restart. To keep the app from starting at login once, hold **Shift** on the login screen when you click Log In
 5. Reset saved settings: `defaults delete io.github.subbak2.PortableHiDPI`
 
+## GPU and battery use
+
+Rendering at 2x and scaling down costs some GPU time. Measured on one setup (MacBook Pro M1 Max, macOS 27, 16" 2560×1600 monitor at 1680×1050 HiDPI, 60 Hz, idle desktop, GPU "Device Utilization" from `ioreg`):
+
+| | GPU utilization |
+|---|---|
+| HiDPI on | about 5–6% |
+| HiDPI off | about 0.3% |
+
+On battery that means somewhat shorter battery life while an external monitor is connected; the exact amount depends on your Mac, resolution and what's on screen (video and scrolling cost more than a still desktop). If battery matters more than sharp text, choose **Off** while unplugged. To measure watts on your own Mac: `sudo scripts/measure-power.sh`.
+
 ## Limitations
 
 - While mirroring, HDR is not available and the monitor runs SDR.
 - 120 Hz through a mirrored virtual display can feel choppy on some setups; use 60 Hz if it does.
-- Rendering at 2x costs some GPU time and memory (a 3360×2100 frame buffer).
+- Rendering at 2x costs some GPU time and memory (a 3360×2100 frame buffer); see "GPU and battery use".
 
 ## Command line
 
