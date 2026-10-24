@@ -131,7 +131,6 @@ final class HiDPISession {
     private func mirror(using mode: CGDisplayMode) throws {
         guard let vid = virtualID else { throw HiDPIError.createFailed }
         let origin = CGDisplayBounds(display.id).origin
-        let native = Displays.nativeMode(display.id, native: display.native, refresh: refresh)
 
         // Done as separate transactions: macOS rejects (kCGErrorInvalidOperation) a single
         // transaction that both sets modes and builds the mirror set.
@@ -140,14 +139,23 @@ final class HiDPISession {
             // Put the virtual display where the panel was, so the arrangement doesn't jump.
             CGConfigureDisplayOrigin(config, vid, Int32(origin.x), Int32(origin.y))
         }
-        // The panel must run at its full pixel size, otherwise the 2x image gets scaled twice.
-        if let native {
-            try configure("panel native mode") { config in
-                CGConfigureDisplayWithDisplayMode(config, display.id, native, nil)
-            }
-        }
         try configure("mirror") { config in
             CGConfigureDisplayMirrorOfDisplay(config, display.id, vid)
+        }
+        enforcePanelMode()
+    }
+
+    /// Joining a mirror set makes macOS drive the panel with the virtual display's mode
+    /// (3360×2100 and so on), which the monitor's scaler shrinks with black borders.
+    /// Set the panel back to its own pixel size; called again after every display change.
+    func enforcePanelMode() {
+        guard virtualID != nil, CGDisplayIsOnline(display.id) != 0,
+              let current = CGDisplayCopyDisplayMode(display.id),
+              current.pixelWidth != display.native.width || current.pixelHeight != display.native.height,
+              let native = Displays.nativeMode(display.id, native: display.native, refresh: refresh)
+        else { return }
+        try? configure("panel native mode") { config in
+            CGConfigureDisplayWithDisplayMode(config, display.id, native, nil)
         }
     }
 

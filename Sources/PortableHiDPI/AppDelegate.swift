@@ -74,6 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             session.stop()
             sessions[key] = nil
         }
+        sessions.values.forEach { $0.enforcePanelMode() }
         for display in externals where sessions[display.key] == nil {
             if let res = savedResolution(for: display.key), display.candidates.contains(res) {
                 enable(display, res, refresh: preferredRefresh(for: display), remember: false)
@@ -175,6 +176,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(item)
         }
 
+        if let active {
+            let retry = NSMenuItem(title: L("Re-apply (fix black borders or blur)", "다시 적용 (여백·흐림 고치기)"),
+                                   action: #selector(reapply(_:)), keyEquivalent: "")
+            retry.target = self
+            retry.representedObject = Choice(display: display, resolution: active.resolution, refresh: active.refresh)
+            retry.indentationLevel = 1
+            menu.addItem(retry)
+        }
+
         let sizeTitle = display.panelInches.map { L("Monitor Size: \(Self.inchText($0))", "모니터 크기: \(Self.inchText($0))") }
             ?? L("Monitor Size: Auto", "모니터 크기: 자동")
         let sizeParent = NSMenuItem(title: sizeTitle, action: nil, keyEquivalent: "")
@@ -251,6 +261,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             defaults.removeObject(forKey: "inches.\(c.key)")
         }
+    }
+
+    /// Rebuilds the virtual display and mirror from scratch, for when macOS left the monitor
+    /// in a wrong mode (black borders) or dropped the mirror (blurry again).
+    @objc private func reapply(_ sender: NSMenuItem) {
+        guard let c = sender.representedObject as? Choice, let res = c.resolution else { return }
+        enable(c.display, res, refresh: c.refresh, remember: false)
     }
 
     @objc private func selectOff(_ sender: NSMenuItem) {

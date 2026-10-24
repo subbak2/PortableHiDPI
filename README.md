@@ -38,6 +38,7 @@ Click the menu bar icon. For each external monitor:
 
 - **Off (macOS default)** – no virtual display.
 - **1680×1050 HiDPI (recommended)**, … – pick the size you want. The choice is remembered per monitor and re-applied when you reconnect it.
+- **Re-apply (fix black borders or blur)** – shown while HiDPI is on. Rebuilds the virtual display and mirror from scratch if the picture ever gets black borders or turns blurry again.
 - **Monitor Size** – set your monitor's diagonal. Many portable monitors report a wrong size (the one tested here claims to be 27"), and the size is used for the *recommended* mark.
 - **Refresh Rate** – 60 Hz or 120 Hz on monitors that support it.
 - **Launch at Login**
@@ -109,6 +110,6 @@ MIT
 
 **설치**: [Releases](../../releases)에서 `PortableHiDPI.zip`을 받아 응용 프로그램 폴더로 옮긴 뒤, 처음 한 번은 **우클릭 → 열기**로 실행합니다. Apple 개발자 공증을 받지 않은 앱이라 그냥 더블클릭하면 막힙니다. 터미널에서 `xattr -dr com.apple.quarantine /Applications/PortableHiDPI.app`을 실행해도 됩니다.
 
-**사용법**: 메뉴바 모니터 아이콘에서 해상도를 고릅니다. 모니터마다 설정을 기억하고 다시 연결하면 자동으로 적용합니다. 휴대용 모니터는 크기 정보가 틀린 경우가 많으니(테스트한 16인치 모니터는 27인치라고 보고함) **모니터 크기**를 직접 골라 주면 추천 해상도가 정확해집니다. 추천 기준은 맥북 내장 화면과 같은 글씨 크기(약 125pt/인치)이며 위 표와 같습니다.
+**사용법**: 메뉴바 모니터 아이콘에서 해상도를 고릅니다. 모니터마다 설정을 기억하고 다시 연결하면 자동으로 적용합니다. 화면 둘레에 검은 여백이 생기거나 다시 흐려지면 메뉴의 **다시 적용 (여백·흐림 고치기)**를 누르세요. 휴대용 모니터는 크기 정보가 틀린 경우가 많으니(테스트한 16인치 모니터는 27인치라고 보고함) **모니터 크기**를 직접 골라 주면 추천 해상도가 정확해집니다. 추천 기준은 맥북 내장 화면과 같은 글씨 크기(약 125pt/인치)이며 위 표와 같습니다.
 
 **한계**: Apple 비공개 API(`CGVirtualDisplay`)를 써서 macOS 업데이트로 안 될 수 있습니다. 미러링 중에는 HDR이 꺼지고, 환경에 따라 120Hz가 끊겨 보일 수 있습니다(그러면 60Hz로). 잠자기 때는 가상 모니터를 껐다가 깨어나고 3초 뒤 다시 켭니다. 해상도는 시스템 설정 > 디스플레이가 아니라 PortableHiDPI 메뉴에서 바꿔 주세요. 시스템 설정에서 화면비가 다른 모드를 고르면 화면 둘레에 검은 여백이 생깁니다.
