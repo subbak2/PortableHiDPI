@@ -7,14 +7,14 @@ import AppKit
 //   PortableHiDPI --inches 16 ...        set the first external display's size (EDIDs are often wrong)
 let args = CommandLine.arguments
 if args.contains("--list") || args.contains("--apply") || args.contains("--inches") {
-    var names: [String: String] = [:]
-    var externals = Displays.externals(nameCache: &names)
+    var cache: [String: PhysicalDisplay] = [:]
+    var externals = Displays.externals(cache: &cache)
     if let i = args.firstIndex(of: "--inches"), i + 1 < args.count, let inches = Double(args[i + 1]), let d = externals.first {
         UserDefaults.standard.set(inches, forKey: "inches.\(d.key)")
-        externals = Displays.externals(nameCache: &names)
+        externals = Displays.externals(cache: &cache)
     }
     if args.contains("--list") {
-        if externals.isEmpty { print("No external display") }
+        if externals.isEmpty { print("No external display (monitors HiDPI is currently on for are not listed)") }
         for d in externals {
             let size = d.diagonalInches.map { String(format: " %.1f\"", $0) } ?? ""
             print("\(d.name) [\(d.key)] native \(d.native)\(size) max \(Int(d.maxRefresh))Hz")

@@ -24,7 +24,7 @@ struct Resolution: Hashable, CustomStringConvertible {
 
 /// A real external display as seen by CoreGraphics.
 struct PhysicalDisplay {
-    let id: CGDirectDisplayID
+    var id: CGDirectDisplayID
     let name: String
     let native: Resolution
     let maxRefresh: Double
@@ -107,9 +107,13 @@ enum Displays {
         CGDisplayVendorNumber(id) == virtualVendorID
     }
 
-    /// External, non-virtual displays. Names are cached because a display that mirrors
-    /// another one has no NSScreen of its own.
-    static func externals(nameCache: inout [String: String]) -> [PhysicalDisplay] {
+    /// External, non-virtual displays, keyed into `cache` by PhysicalDisplay.key.
+    ///
+    /// While a monitor mirrors one of our virtual displays it reports the virtual display's
+    /// modes (e.g. 6400×3600) and has no NSScreen, so its panel resolution and name can't be
+    /// read then. Those monitors come from `cache`, filled while they were not mirrored;
+    /// without a cache entry they are skipped.
+    static func externals(cache: inout [String: PhysicalDisplay]) -> [PhysicalDisplay] {
         var screenNames: [CGDirectDisplayID: String] = [:]
         for screen in NSScreen.screens {
             if let n = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber {
@@ -117,17 +121,27 @@ enum Displays {
             }
         }
         return onlineIDs().compactMap { id in
-            guard CGDisplayIsBuiltin(id) == 0, !isOurs(id), let native = nativeResolution(id) else { return nil }
+            guard CGDisplayIsBuiltin(id) == 0, !isOurs(id) else { return nil }
             let key = "\(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))-\(CGDisplaySerialNumber(id))"
-            if let n = screenNames[id] { nameCache[key] = n }
-            let name = nameCache[key] ?? "Display \(id)"
-            let maxRefresh = allModes(id)
-                .filter { $0.pixelWidth == native.width && $0.pixelHeight == native.height }
-                .map(\.refreshRate).max() ?? 60
             let inches = UserDefaults.standard.double(forKey: "inches.\(key)")
-            return PhysicalDisplay(id: id, name: name, native: native, maxRefresh: maxRefresh,
-                                   sizeInMillimeters: CGDisplayScreenSize(id),
-                                   panelInches: inches > 0 ? inches : nil)
+            let master = CGDisplayMirrorsDisplay(id)
+            var display: PhysicalDisplay
+            if master != kCGNullDirectDisplay, isOurs(master) {
+                guard let cached = cache[key] else { return nil }
+                display = cached
+                display.id = id
+            } else {
+                guard let native = nativeResolution(id) else { return nil }
+                let maxRefresh = allModes(id)
+                    .filter { $0.pixelWidth == native.width && $0.pixelHeight == native.height }
+                    .map(\.refreshRate).max() ?? 60
+                display = PhysicalDisplay(id: id, name: screenNames[id] ?? cache[key]?.name ?? "Display \(id)",
+                                          native: native, maxRefresh: maxRefresh,
+                                          sizeInMillimeters: CGDisplayScreenSize(id))
+            }
+            display.panelInches = inches > 0 ? inches : nil
+            cache[key] = display
+            return display
         }
     }
 

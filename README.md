@@ -74,6 +74,7 @@ PortableHiDPI.app/Contents/MacOS/PortableHiDPI --apply off
 - 120 Hz through a mirrored virtual display can feel choppy on some setups; use 60 Hz if it does.
 - Mirroring across sleep is fragile in macOS, so the app removes the virtual display before sleep and recreates it about 3 seconds after wake.
 - Rendering at 2x costs some GPU time and memory (a 3360×2100 frame buffer).
+- Change the resolution from the PortableHiDPI menu, not in System Settings › Displays. The virtual display ("PortableHiDPI …") also lists generic modes there, and picking one with a different aspect ratio leaves black bars around the picture.
 
 ## Build from source
 
@@ -110,4 +111,4 @@ MIT
 
 **사용법**: 메뉴바 모니터 아이콘에서 해상도를 고릅니다. 모니터마다 설정을 기억하고 다시 연결하면 자동으로 적용합니다. 휴대용 모니터는 크기 정보가 틀린 경우가 많으니(테스트한 16인치 모니터는 27인치라고 보고함) **모니터 크기**를 직접 골라 주면 추천 해상도가 정확해집니다. 추천 기준은 맥북 내장 화면과 같은 글씨 크기(약 125pt/인치)이며 위 표와 같습니다.
 
-**한계**: Apple 비공개 API(`CGVirtualDisplay`)를 써서 macOS 업데이트로 안 될 수 있습니다. 미러링 중에는 HDR이 꺼지고, 환경에 따라 120Hz가 끊겨 보일 수 있습니다(그러면 60Hz로). 잠자기 때는 가상 모니터를 껐다가 깨어나고 3초 뒤 다시 켭니다.
+**한계**: Apple 비공개 API(`CGVirtualDisplay`)를 써서 macOS 업데이트로 안 될 수 있습니다. 미러링 중에는 HDR이 꺼지고, 환경에 따라 120Hz가 끊겨 보일 수 있습니다(그러면 60Hz로). 잠자기 때는 가상 모니터를 껐다가 깨어나고 3초 뒤 다시 켭니다. 해상도는 시스템 설정 > 디스플레이가 아니라 PortableHiDPI 메뉴에서 바꿔 주세요. 시스템 설정에서 화면비가 다른 모드를 고르면 화면 둘레에 검은 여백이 생깁니다.

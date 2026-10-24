@@ -4,7 +4,7 @@ import ServiceManagement
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var sessions: [String: HiDPISession] = [:] // by PhysicalDisplay.key
-    private var nameCache: [String: String] = [:]
+    private var displayCache: [String: PhysicalDisplay] = [:]
     private var reconfigureScheduled = false
     private var isAsleep = false
     private let defaults = UserDefaults.standard
@@ -68,7 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// Drops sessions whose monitor went away and re-applies saved settings to monitors that came back.
     private func reconcile() {
         guard !isAsleep else { return }
-        let externals = Displays.externals(nameCache: &nameCache)
+        let externals = Displays.externals(cache: &displayCache)
         let present = Set(externals.map(\.key))
         for (key, session) in sessions where !present.contains(key) || CGDisplayIsOnline(session.display.id) == 0 {
             session.stop()
@@ -128,7 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let externals = Displays.externals(nameCache: &nameCache)
+        let externals = Displays.externals(cache: &displayCache)
         if externals.isEmpty {
             menu.addItem(disabledItem(L("No external display", "연결된 외장 모니터 없음")))
         }
