@@ -132,6 +132,8 @@ Rendering at 2x and scaling down costs some GPU time. Measured on one setup (Mac
 | HiDPI on | about 5–6% |
 | HiDPI off | about 0.3% |
 
+With no external monitor connected, the app just sits in the menu bar: CPU stays at about 0% (0–1% in 5-second samples) and it submits no GPU work, so leaving it running costs nothing noticeable.
+
 On battery that means somewhat shorter battery life while an external monitor is connected; the exact amount depends on your Mac, resolution and what's on screen (video and scrolling cost more than a still desktop). If battery matters more than sharp text, choose **Off** while unplugged. To measure watts on your own Mac: `sudo scripts/measure-power.sh`.
 
 ## Cursor in the right and bottom edge
