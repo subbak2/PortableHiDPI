@@ -33,6 +33,7 @@ final class HiDPISession {
     let refresh: Double
     private(set) var virtualDisplay: CGVirtualDisplay?
     private var originalMode: CGDisplayMode?
+    private var cursorOverlay: CursorOverlay?
 
     var virtualID: CGDirectDisplayID? { virtualDisplay?.displayID }
 
@@ -82,6 +83,10 @@ final class HiDPISession {
             }
             do {
                 try self.mirror(using: mode)
+                if let vid = self.virtualID {
+                    self.cursorOverlay = CursorOverlay(virtualID: vid, panelID: self.display.id)
+                    self.cursorOverlay?.start()
+                }
                 completion(nil)
             } catch {
                 // Earlier steps may already have changed the panel's mode: roll back.
@@ -92,7 +97,13 @@ final class HiDPISession {
     }
 
     /// Restores the panel's previous mode. Releasing the virtual display also ends the mirror.
+    func syncCursorSize() {
+        cursorOverlay?.syncPointerSize()
+    }
+
     func stop() {
+        cursorOverlay?.stop()
+        cursorOverlay = nil
         defer { virtualDisplay = nil }
         guard let vid = virtualID, CGDisplayIsOnline(display.id) != 0 else { return }
         var config: CGDisplayConfigRef?

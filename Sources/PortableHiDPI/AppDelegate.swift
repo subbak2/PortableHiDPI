@@ -158,6 +158,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         if !externals.isEmpty { menu.removeItem(at: menu.numberOfItems - 1) }
 
+        if !sessions.isEmpty {
+            menu.addItem(.separator())
+            let sync = NSMenuItem(title: L("Match Cursor Size", "커서 크기 맞추기"), action: #selector(syncCursorSize), keyEquivalent: "")
+            sync.target = self
+            sync.toolTip = L("Re-read Pointer size from System Settings › Accessibility › Display.",
+                             "시스템 설정 › 손쉬운 사용 › 디스플레이의 포인터 크기를 다시 읽습니다.")
+            menu.addItem(sync)
+        }
+
         menu.addItem(.separator())
         let login = NSMenuItem(title: L("Launch at Login", "로그인 시 실행"), action: #selector(toggleLogin), keyEquivalent: "")
         login.target = self
@@ -305,6 +314,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let res = c.resolution {
             enable(c.display, res, refresh: c.refresh, remember: true)
         }
+    }
+
+    @objc private func syncCursorSize() {
+        sessions.values.forEach { $0.syncCursorSize() }
     }
 
     @objc private func toggleLogin() {

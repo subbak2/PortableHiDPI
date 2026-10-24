@@ -67,6 +67,7 @@ Models are examples; check your monitor's panel resolution.
 | Blurry again after waking from sleep | Wait ~3 seconds (it re-applies automatically), else **Re-apply** |
 | An extra "PortableHiDPI …" display in System Settings › Displays | Expected: that's the virtual display. Change resolution from the menu bar app, not there |
 | HDR is off | Limitation of mirroring. Choose **Off** when you need HDR |
+| Link-hand or text cursor disappears near the right/bottom edge | Handled by the app (see below). If the copy is the wrong size, **Match Cursor Size** |
 | Anything else odd | **Quit** – the monitor goes back to its previous mode |
 
 ### Uninstall
@@ -132,6 +133,14 @@ Rendering at 2x and scaling down costs some GPU time. Measured on one setup (Mac
 | HiDPI off | about 0.3% |
 
 On battery that means somewhat shorter battery life while an external monitor is connected; the exact amount depends on your Mac, resolution and what's on screen (video and scrolling cost more than a still desktop). If battery matters more than sharp text, choose **Off** while unplugged. To measure watts on your own Mac: `sudo scripts/measure-power.sh`.
+
+## Cursor in the right and bottom edge
+
+While mirroring, macOS keeps the real monitor's own desktop area at its native HiDPI size (1280×800 points for a 2560×1600 panel), smaller than the virtual display (1680×1050). The arrow cursor shows everywhere, but cursors that apps switch to (the link hand, the text I-beam) disappear in the strip outside that area: roughly the right and bottom quarter.
+
+PortableHiDPI draws a copy of the cursor there, in a click-through window, only when the cursor is not the arrow. It matches your Pointer size setting (System Settings › Accessibility › Display); after changing it, choose **Match Cursor Size** in the menu.
+
+Because it's drawn by an app rather than the hardware, that copy can trail the mouse by about a frame and switches shape a few milliseconds late. It costs a few % CPU only while the pointer moves in that strip, and nothing elsewhere.
 
 ## Limitations
 
